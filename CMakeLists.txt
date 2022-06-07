@@ -13,7 +13,8 @@ set(WSECHOSERVER_H)
 
 add_executable(wsechoserver ${WSECHOSERVER_CPP} ${WSECHOSERVER_H})
 target_compile_definitions(
-    wsechoserver PRIVATE CMAKE_CURRENT_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}" CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    wsechoserver PRIVATE CMAKE_CURRENT_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}"
+                         CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
 )
 target_link_libraries(
     wsechoserver PRIVATE snodec::express snodec::core-legacy snodec::core-tls

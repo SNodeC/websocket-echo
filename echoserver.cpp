@@ -79,8 +79,8 @@ int main(int argc, char* argv[]) {
     });
 
     std::map<std::string, std::any> options;
-    options["CertChain"] = "/home/voc/projects/websocket-echo/certs/WebServerCertificateChain.pem";
-    options["CertChainKey"] = "/home/voc/projects/websocket-echo/certs/Volker_Christian_-_WEB-Cert.pem";
+    options["CertChain"] = CMAKE_CURRENT_SOURCE_DIR "/certs/WebServerCertificateChain.pem";
+    options["CertChainKey"] = CMAKE_CURRENT_SOURCE_DIR "/certs/Volker_Christian_-_WEB-Cert.pem";
     options["Password"] = "pentium5";
 
     {
