@@ -5,7 +5,7 @@ project(WebSocket-Echo LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(snodec COMPONENTS express httpclient net-in core-legacy core-tls)
+find_package(snodec COMPONENTS express http-client net-in core-legacy core-tls)
 
 set(WSECHOSERVER_CPP echoserver.cpp)
 
@@ -31,7 +31,7 @@ target_compile_definitions(
     wsechoclient PRIVATE CMAKE_CURRENT_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}"
 )
 target_link_libraries(
-    wsechoclient PRIVATE snodec::httpclient snodec::core-legacy
+    wsechoclient PRIVATE snodec::http-client snodec::core-legacy
                          snodec::core-tls snodec::net-in
 )
 install(TARGETS wsechoclient RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
