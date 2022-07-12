@@ -23,6 +23,8 @@
 #include "log/Logger.h"
 #include "web/http/http_utils.h" // for ci_contains
 
+#include <cerrno>
+
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 using namespace express;
@@ -70,11 +72,14 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    legacyApp.listen([](const tls::in::WebApp::SocketAddress& socketAddress, int err) -> void {
-        if (err != 0) {
-            PLOG(ERROR) << "OnError: " << err;
+    legacyApp.listen([](const tls::in::WebApp::SocketAddress& socketAddress, int errnum) -> void {
+        if (errnum < 0) {
+            PLOG(ERROR) << "OnError";
+        } else if (errnum > 0) {
+            errno = errnum;
+            PLOG(ERROR) << "OnError: " << socketAddress.toString();
         } else {
-            VLOG(0) << "wsechoserver listening on " << socketAddress.toString();
+            VLOG(0) << "snode.c connecting to " << socketAddress.toString();
         }
     });
 
@@ -122,11 +127,14 @@ int main(int argc, char* argv[]) {
             }
         });
 
-        tlsApp.listen([](const tls::in::WebApp::SocketAddress& socketAddress, int err) -> void {
-            if (err != 0) {
-                PLOG(ERROR) << "OnError: " << err;
+        tlsApp.listen([](const tls::in::WebApp::SocketAddress& socketAddress, int errnum) -> void {
+            if (errnum < 0) {
+                PLOG(ERROR) << "OnError";
+            } else if (errnum > 0) {
+                errno = errnum;
+                PLOG(ERROR) << "OnError: " << socketAddress.toString();
             } else {
-                VLOG(0) << "wsechoserver listening on " << socketAddress.toString();
+                VLOG(0) << "snode.c connecting to " << socketAddress.toString();
             }
         });
     }

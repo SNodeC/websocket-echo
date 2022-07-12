@@ -25,6 +25,7 @@
 #include "web/http/legacy/in/Client.h" // for Client, Client<>...
 #include "web/http/tls/in/Client.h"    // for Client, Client<>...
 
+#include <cerrno>
 #include <openssl/asn1.h>     // for ASN1_STRING_get0_data, ASN1_STRING_length
 #include <openssl/crypto.h>   // for OPENSSL_free
 #include <openssl/obj_mac.h>  // for NID_subject_alt_name
@@ -100,11 +101,14 @@ int main(int argc, char* argv[]) {
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             });
-        legacyClient.connect([](const LegacySocketAddress& socketAddress, int err) -> void {
-            if (err != 0) {
-                PLOG(ERROR) << "OnError: " << err;
+        legacyClient.connect([](const LegacySocketAddress& socketAddress, int errnum) -> void {
+            if (errnum < 0) {
+                PLOG(ERROR) << "OnError";
+            } else if (errnum > 0) {
+                errno = errnum;
+                PLOG(ERROR) << "OnError: " << socketAddress.toString();
             } else {
-                VLOG(0) << "wsechoclient connecting to " << socketAddress.toString();
+                VLOG(0) << "snode.c connecting to " << socketAddress.toString();
             }
         }); // Connection:keep-alive\r\n\r\n"
 
@@ -217,11 +221,14 @@ int main(int argc, char* argv[]) {
             },
             options);
 
-        tlsClient.connect("localhost", 8088, [](const TLSSocketAddress& socketAddress, int err) -> void {
-            if (err != 0) {
-                PLOG(ERROR) << "OnError: " << err;
+        tlsClient.connect("localhost", 8088, [](const TLSSocketAddress& socketAddress, int errnum) -> void {
+            if (errnum < 0) {
+                PLOG(ERROR) << "OnError";
+            } else if (errnum > 0) {
+                errno = errnum;
+                PLOG(ERROR) << "OnError: " << socketAddress.toString();
             } else {
-                VLOG(0) << "wsechoclient connecting to " << socketAddress.toString();
+                VLOG(0) << "snode.c connecting to " << socketAddress.toString();
             }
         }); // Connection:keep-alive\r\n\r\n"
     }
