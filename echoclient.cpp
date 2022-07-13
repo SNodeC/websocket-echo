@@ -25,7 +25,6 @@
 #include "web/http/legacy/in/Client.h" // for Client, Client<>...
 #include "web/http/tls/in/Client.h"    // for Client, Client<>...
 
-#include <cerrno>
 #include <openssl/asn1.h>     // for ASN1_STRING_get0_data, ASN1_STRING_length
 #include <openssl/crypto.h>   // for OPENSSL_free
 #include <openssl/obj_mac.h>  // for NID_subject_alt_name
@@ -105,7 +104,6 @@ int main(int argc, char* argv[]) {
             if (errnum < 0) {
                 PLOG(ERROR) << "OnError";
             } else if (errnum > 0) {
-                errno = errnum;
                 PLOG(ERROR) << "OnError: " << socketAddress.toString();
             } else {
                 VLOG(0) << "snode.c connecting to " << socketAddress.toString();
@@ -225,7 +223,6 @@ int main(int argc, char* argv[]) {
             if (errnum < 0) {
                 PLOG(ERROR) << "OnError";
             } else if (errnum > 0) {
-                errno = errnum;
                 PLOG(ERROR) << "OnError: " << socketAddress.toString();
             } else {
                 VLOG(0) << "snode.c connecting to " << socketAddress.toString();
