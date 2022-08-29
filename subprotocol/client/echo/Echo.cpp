@@ -24,27 +24,13 @@
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
+#define PING_INTERVAL 5
 #define MAX_FLYING_PINGS 3
-#define PING_DELAY 5
 
 namespace web::websocket::subprotocol::echo::client {
 
     Echo::Echo(const std::string& name)
-        : web::websocket::client::SubProtocol(name)
-        , pingTimer(core::timer::Timer::intervalTimer(
-              [this]([[maybe_unused]] const void* arg) -> void {
-                  this->sendPing();
-                  this->flyingPings++;
-                  if (this->flyingPings >= MAX_FLYING_PINGS) {
-                      this->sendClose();
-                  }
-              },
-              PING_DELAY,
-              nullptr)) {
-    }
-
-    Echo::~Echo() {
-        pingTimer.cancel();
+        : web::websocket::client::SubProtocol(name, PING_INTERVAL, MAX_FLYING_PINGS) {
     }
 
     void Echo::onConnected() {

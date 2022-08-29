@@ -19,7 +19,6 @@
 #ifndef WEB_WEBSOCKET_SUBPROTOCOL_ECHO_SERVER_ECHO_H
 #define WEB_WEBSOCKET_SUBPROTOCOL_ECHO_SERVER_ECHO_H
 
-#include "core/timer/Timer.h"
 #include "web/websocket/client/SubProtocol.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -35,7 +34,7 @@ namespace web::websocket::subprotocol::echo::client {
     class Echo : public web::websocket::client::SubProtocol {
     public:
         explicit Echo(const std::string& name);
-        ~Echo() override;
+        ~Echo() override = default;
 
     private:
         void onConnected() override;
@@ -49,8 +48,6 @@ namespace web::websocket::subprotocol::echo::client {
         std::string data;
 
         int flyingPings = 0;
-
-        core::timer::Timer pingTimer;
     };
 
 } // namespace web::websocket::subprotocol::echo::client
