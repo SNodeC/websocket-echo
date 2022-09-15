@@ -7,6 +7,32 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(snodec COMPONENTS http-server-express http-client net-in-stream-legacy net-in-stream-tls)
 
+find_program(iwyu_path NAMES include-what-you-use iwyu)
+
+if(iwyu_path)
+    option(CHECK_INCLUDES "Check used headers")
+
+    set(iwyu_path_and_options
+        ${iwyu_path}
+        -Xiwyu
+        --verbose=3
+        -Xiwyu
+        --cxx17ns
+        -Xiwyu
+        --quoted_includes_first
+        -Xiwyu
+        --check_also='${PROJECT_SOURCE_DIR}/*'
+    )
+
+    if(CHECK_INCLUDES)
+        set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options})
+    endif(CHECK_INCLUDES)
+else()
+    message(
+        AUTHOR_WARNING "Could not find the program include-what-you-use"
+    )
+endif()
+
 set(WSECHOSERVER_CPP echoserver.cpp)
 
 set(WSECHOSERVER_H)

@@ -25,15 +25,16 @@
 #include "web/http/legacy/in/Client.h" // for Client, Client<>...
 #include "web/http/tls/in/Client.h"    // for Client, Client<>...
 
-#include <openssl/asn1.h>     // for ASN1_STRING_get0_data, ASN1_STRING_length
-#include <openssl/crypto.h>   // for OPENSSL_free
-#include <openssl/obj_mac.h>  // for NID_subject_alt_name
-#include <openssl/ossl_typ.h> // for X509
-#include <openssl/ssl3.h>     // for SSL_get_peer_certificate, SSL_get_verify_result
+#include <bits/utility.h>
+#include <cstdlib>
+#include <openssl/asn1.h>    // for ASN1_STRING_get0_data, ASN1_STRING_length
+#include <openssl/crypto.h>  // for OPENSSL_free
+#include <openssl/obj_mac.h> // for NID_subject_alt_name
+#include <openssl/ssl3.h>    // for SSL_get_peer_certificate, SSL_get_verify_result
+#include <openssl/types.h>
 #include <openssl/x509.h> // for X509_NAME_oneline, X509_free, X509_get_ext_d2i, X509_get_issuer_name, X509_get_subject_name, X509_verify_...
 #include <openssl/x509v3.h>
 #include <type_traits> // for add_const<>::type
-#include <utility>     // for tuple_element<>::type
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 

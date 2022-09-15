@@ -23,6 +23,8 @@
 #include "log/Logger.h"
 #include "web/http/http_utils.h" // for ci_contains
 
+#include <cstdlib>
+
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 using namespace express;
