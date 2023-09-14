@@ -2,16 +2,6 @@ cmake_minimum_required(VERSION 3.5)
 
 find_package(snodec COMPONENTS websocket-server)
 
-get_target_property(
-    WEBSOCKET_SUBPROTOCOL_SERVER_INSTALL_LIBDIR snodec::websocket-server
-    WEBSOCKET_SUBPROTOCOL_SERVER_INSTALL_LIBDIR
-)
-
-get_target_property(
-    WEBSOCKET_SUBPROTOCOL_SERVER_INCLUDE_DIRS snodec::websocket-server
-    WEBSOCKET_SUBPROTOCOL_SERVER_INCLUDE_DIRS
-)
-
 set(ECHOSERVERSUBPROTOCOL_CPP Echo.cpp EchoFactory.cpp)
 
 set(ECHOSERVERSUBPROTOCOL_H Echo.h EchoFactory.h)
@@ -21,9 +11,7 @@ add_library(
                                  ${ECHOSERVERSUBPROTOCOL_H}
 )
 
-target_include_directories(
-    echoserversubprotocol PUBLIC ${WEBSOCKET_SUBPROTOCOL_SERVER_INCLUDE_DIRS}
-)
+target_link_libraries(echoserversubprotocol PUBLIC snodec::websocket-server)
 
 set_target_properties(
     echoserversubprotocol

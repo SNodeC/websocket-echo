@@ -34,7 +34,6 @@
 #include <openssl/types.h>
 #include <openssl/x509.h> // for X509_NAME_oneline, X509_free, X509_get_ext_d2i, X509_get_issuer_name, X509_get_subject_name, X509_verify_...
 #include <openssl/x509v3.h>
-#include <type_traits> // for add_const<>::type
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -217,8 +216,7 @@ int main(int argc, char* argv[]) {
 
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
-            },
-            options);
+            });
 
         tlsClient.connect("localhost", 8088, [](const TLSSocketAddress& socketAddress, int errnum) -> void {
             if (errnum < 0) {

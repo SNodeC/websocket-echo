@@ -26,8 +26,8 @@
 
 namespace web::websocket::subprotocol::echo::client {
 
-    Echo* EchoFactory::create() {
-        return new Echo(getName());
+    Echo* EchoFactory::create(SubProtocolContext* subProtocolContext) {
+        return new Echo(subProtocolContext, getName());
     }
 
 } // namespace web::websocket::subprotocol::echo::client

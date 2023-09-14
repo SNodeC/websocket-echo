@@ -20,7 +20,12 @@
 #define WEB_WEBSOCKET_SUBPROTOCOL_ECHO_SERVER_ECHOINTERFACE_H
 
 #include "Echo.h"
-#include "web/websocket/SubProtocolFactory.h"
+
+#include <web/websocket/SubProtocolFactory.h>
+
+namespace web::websocket {
+    class SubProtocolContext;
+}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -35,7 +40,7 @@ namespace web::websocket::subprotocol::echo::server {
         using web::websocket::SubProtocolFactory<Echo>::SubProtocolFactory;
 
     private:
-        Echo* create() override;
+        Echo* create(web::websocket::SubProtocolContext* subProtocolContext) override;
     };
 
 } // namespace web::websocket::subprotocol::echo::server

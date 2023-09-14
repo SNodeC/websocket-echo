@@ -82,13 +82,8 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    std::map<std::string, std::any> options;
-    options["CertChain"] = CMAKE_CURRENT_SOURCE_DIR "/certs/WebServerCertificateChain.pem";
-    options["CertChainKey"] = CMAKE_CURRENT_SOURCE_DIR "/certs/Volker_Christian_-_WEB-Cert.pem";
-    options["Password"] = "pentium5";
-
     {
-        tls::in::WebApp tlsApp("tls", options);
+        tls::in::WebApp tlsApp("tls");
 
         tlsApp.get("/", [] APPLICATION(req, res) {
             if (req.url == "/" || req.url == "/index.html") {

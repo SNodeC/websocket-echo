@@ -19,7 +19,11 @@
 #ifndef WEB_WEBSOCKET_SUBPROTOCOL_ECHO_SERVER_ECHO_H
 #define WEB_WEBSOCKET_SUBPROTOCOL_ECHO_SERVER_ECHO_H
 
-#include "web/websocket/client/SubProtocol.h"
+#include <web/websocket/client/SubProtocol.h>
+
+namespace web::websocket {
+    class SubProtocolContext;
+}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -33,7 +37,7 @@ namespace web::websocket::subprotocol::echo::client {
 
     class Echo : public web::websocket::client::SubProtocol {
     public:
-        explicit Echo(const std::string& name);
+        explicit Echo(web::websocket::SubProtocolContext* subProtocolContext, const std::string& name);
         ~Echo() override = default;
 
     private:
@@ -44,6 +48,7 @@ namespace web::websocket::subprotocol::echo::client {
         void onMessageError(uint16_t errnum) override;
         void onPongReceived() override;
         void onDisconnected() override;
+        void onExit(int sig) override;
 
         std::string data;
 

@@ -20,7 +20,8 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include "log/Logger.h"
+#include <cstring>
+#include <log/Logger.h>
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -29,8 +30,8 @@
 
 namespace web::websocket::subprotocol::echo::client {
 
-    Echo::Echo(const std::string& name)
-        : web::websocket::client::SubProtocol(name, PING_INTERVAL, MAX_FLYING_PINGS) {
+    Echo::Echo(SubProtocolContext* subProtocolContext, const std::string& name)
+        : web::websocket::client::SubProtocol(subProtocolContext, name, PING_INTERVAL, MAX_FLYING_PINGS) {
     }
 
     void Echo::onConnected() {
@@ -71,6 +72,10 @@ namespace web::websocket::subprotocol::echo::client {
 
     void Echo::onDisconnected() {
         VLOG(0) << "Echo disconnected:";
+    }
+
+    void Echo::onExit(int sig) {
+        LOG(INFO) << "SubProtocol 'echo' exit dot to '" << strsignal(sig) << "' (SIG" << sigabbrev_np(sig) << " = " << sig << ")";
     }
 
 } // namespace web::websocket::subprotocol::echo::client
