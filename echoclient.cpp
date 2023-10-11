@@ -98,9 +98,29 @@ int main(int argc, char* argv[]) {
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             });
-        legacyClient.connect([](const core::ProgressLog& progressLog) -> void {
-            progressLog.logProgress();
-        }); // Connection:keep-alive\r\n\r\n"
+
+        legacyClient.connect(
+            "localhost",
+            8080,
+            [](const web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>::SocketAddress& socketAddress,
+               const core::socket::State& state) -> void {
+                switch (state) {
+                    case core::socket::State::OK:
+                        VLOG(1) << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
+                        break;
+                    case core::socket::State::DISABLED:
+                        VLOG(1) << "legacy: disabled";
+                        break;
+                    case core::socket::State::ERROR:
+                        VLOG(1) << "legacy: " << socketAddress.toString() << ": non critical error occurred";
+                        VLOG(1) << "    " << state.what();
+                        break;
+                    case core::socket::State::FATAL:
+                        VLOG(1) << "legacy: " << socketAddress.toString() << ": critical error occurred";
+                        VLOG(1) << "    " << state.what();
+                        break;
+                }
+            }); // Connection:keep-alive\r\n\r\n"
 
         std::map<std::string, std::any> options;
         options["CertChain"] = "/home/voc/projects/websocket-echo/certs/WebServerCertificateChain.pem";
@@ -208,9 +228,28 @@ int main(int argc, char* argv[]) {
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             });
 
-        tlsClient.connect("localhost", 8088, [](const core::ProgressLog& progressLog) -> void {
-            progressLog.logProgress();
-        }); // Connection:keep-alive\r\n\r\n"
+        tlsClient.connect(
+            "localhost",
+            8088,
+            [](const web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>::SocketAddress& socketAddress,
+               const core::socket::State& state) -> void {
+                switch (state) {
+                    case core::socket::State::OK:
+                        VLOG(1) << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
+                        break;
+                    case core::socket::State::DISABLED:
+                        VLOG(1) << "legacy: disabled";
+                        break;
+                    case core::socket::State::ERROR:
+                        VLOG(1) << "legacy: " << socketAddress.toString() << ": non critical error occurred";
+                        VLOG(1) << "    " << state.what();
+                        break;
+                    case core::socket::State::FATAL:
+                        VLOG(1) << "legacy: " << socketAddress.toString() << ": critical error occurred";
+                        VLOG(1) << "    " << state.what();
+                        break;
+                }
+            }); // Connection:keep-alive\r\n\r\n"
     }
 
     return core::SNodeC::start();

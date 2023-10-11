@@ -72,8 +72,22 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    legacyApp.listen([](const core::ProgressLog& progressLog) -> void {
-        progressLog.logProgress();
+    legacyApp.listen([](const legacy::in::WebApp::SocketAddress& socketAddress,
+                        const core::socket::State& state) -> void { // Listen on all bluetooth interfaces on channel 16{
+        switch (state) {
+            case core::socket::State::OK:
+                VLOG(1) << "legacy: listening on '" << socketAddress.toString() << "'";
+                break;
+            case core::socket::State::DISABLED:
+                VLOG(1) << "legacy: disabled";
+                break;
+            case core::socket::State::ERROR:
+                VLOG(1) << "legacy: non critical error occurred";
+                break;
+            case core::socket::State::FATAL:
+                VLOG(1) << "legacy: critical error occurred";
+                break;
+        }
     });
 
     {
@@ -115,8 +129,22 @@ int main(int argc, char* argv[]) {
             }
         });
 
-        tlsApp.listen([](const core::ProgressLog& progressLog) -> void {
-            progressLog.logProgress();
+        tlsApp.listen([](const legacy::in::WebApp::SocketAddress& socketAddress,
+                         const core::socket::State& state) -> void { // Listen on all bluetooth interfaces on channel 16{
+            switch (state) {
+                case core::socket::State::OK:
+                    VLOG(1) << "tls: listening on '" << socketAddress.toString() << "'";
+                    break;
+                case core::socket::State::DISABLED:
+                    VLOG(1) << "tls: disabled";
+                    break;
+                case core::socket::State::ERROR:
+                    VLOG(1) << "tls: non critical error occurred";
+                    break;
+                case core::socket::State::FATAL:
+                    VLOG(1) << "tls: critical error occurred";
+                    break;
+            }
         });
     }
 
