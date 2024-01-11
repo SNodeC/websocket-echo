@@ -48,7 +48,7 @@ namespace web::websocket::subprotocol::echo::server {
         void onMessageError(uint16_t errnum) override;
         void onPongReceived() override;
         void onDisconnected() override;
-        void onExit(int sig) override;
+        void onSignal(int sig) override;
 
         std::string data;
 
