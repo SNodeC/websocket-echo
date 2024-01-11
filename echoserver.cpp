@@ -24,6 +24,7 @@
 #include "web/http/http_utils.h" // for ci_contains
 
 #include <cstdlib>
+#include <string>
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 

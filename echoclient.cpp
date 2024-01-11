@@ -25,15 +25,24 @@
 #include "web/http/legacy/in/Client.h" // for Client, Client<>...
 #include "web/http/tls/in/Client.h"    // for Client, Client<>...
 
-#include <bits/utility.h>
+#include <any>
+#include <cstdint>
 #include <cstdlib>
-#include <openssl/asn1.h>    // for ASN1_STRING_get0_data, ASN1_STRING_length
-#include <openssl/crypto.h>  // for OPENSSL_free
-#include <openssl/obj_mac.h> // for NID_subject_alt_name
-#include <openssl/ssl3.h>    // for SSL_get_peer_certificate, SSL_get_verify_result
-#include <openssl/types.h>
-#include <openssl/x509.h> // for X509_NAME_oneline, X509_free, X509_get_ext_d2i, X509_get_issuer_name, X509_get_subject_name, X509_verify_...
+#include <functional>
+#include <map>
+#include <openssl/ssl.h> // IWYU pragma: keep
 #include <openssl/x509v3.h>
+#include <string>
+#include <utility>
+#include <vector>
+
+// IWYU pragma: no_include <bits/utility.h>
+// IWYU pragma: no_include <openssl/asn1.h>
+// IWYU pragma: no_include <openssl/crypto.h>
+// IWYU pragma: no_include <openssl/obj_mac.h>
+// IWYU pragma: no_include <openssl/ssl3.h>
+// IWYU pragma: no_include <openssl/types.h>
+// IWYU pragma: no_include <openssl/x509.h>
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
