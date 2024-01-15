@@ -74,8 +74,10 @@ namespace web::websocket::subprotocol::echo::client {
         VLOG(0) << "Echo disconnected:";
     }
 
-    void Echo::onSignal(int sig) {
+    bool Echo::onSignal(int sig) {
         LOG(INFO) << "SubProtocol 'echo' exit dot to '" << strsignal(sig) << "' (SIG" << sigabbrev_np(sig) << " = " << sig << ")";
+
+        return true;
     }
 
 } // namespace web::websocket::subprotocol::echo::client

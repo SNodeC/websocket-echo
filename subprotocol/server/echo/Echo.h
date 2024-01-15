@@ -36,6 +36,9 @@ namespace web::websocket {
 namespace web::websocket::subprotocol::echo::server {
 
     class Echo : public web::websocket::server::SubProtocol {
+    private:
+        using Super = web::websocket::server::SubProtocol;
+
     public:
         explicit Echo(SubProtocolContext* subProtocolContext, const std::string& name);
         ~Echo() override = default;
@@ -48,7 +51,7 @@ namespace web::websocket::subprotocol::echo::server {
         void onMessageError(uint16_t errnum) override;
         void onPongReceived() override;
         void onDisconnected() override;
-        void onSignal(int sig) override;
+        [[nodiscard]] bool onSignal(int sig) override;
 
         std::string data;
 
