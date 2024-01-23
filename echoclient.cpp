@@ -52,27 +52,31 @@ int main(int argc, char* argv[]) {
     setenv("DL_WSCLIENT_SUBPROTOCOL_PATH", CMAKE_CURRENT_BINARY_DIR "/subprotocol/client/echo", 0);
 
     {
-        web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response> legacyClient(
+        using EchoClientLegacy = web::http::legacy::in::Client;
+        using SocketConnectionLegacy = EchoClientLegacy::SocketConnection;
+        using Request = EchoClientLegacy::Request;
+        using Response = EchoClientLegacy::Response;
+        using SocketAddressLegacy = EchoClientLegacy::SocketAddress;
+
+        EchoClientLegacy legacyClient(
             "legacy",
-            [](web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>::SocketConnection* socketConnection)
-                -> void {
+            [](SocketConnectionLegacy* socketConnection) -> void {
                 VLOG(0) << "OnConnect";
 
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
-            []([[maybe_unused]] web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>::SocketConnection*
-                   socketConnection) -> void {
+            []([[maybe_unused]] SocketConnectionLegacy* socketConnection) -> void {
                 VLOG(0) << "OnConnected";
             },
-            [](web::http::client::Request& request) -> void {
+            [](Request& request) -> void {
                 VLOG(0) << "OnRequestBegin";
 
                 request.set("Sec-WebSocket-Protocol", "test, echo");
 
                 request.upgrade("/ws/", "websocket");
             },
-            [](web::http::client::Request& request, web::http::client::Response& response) -> void {
+            [](Request& request, Response& response) -> void {
                 VLOG(0) << "OnResponse";
                 VLOG(0) << "     Status:";
                 VLOG(0) << "       " << response.httpVersion << " " << response.statusCode << " " << response.reason;
@@ -100,36 +104,37 @@ int main(int argc, char* argv[]) {
                 VLOG(0) << "     Status: " << status;
                 VLOG(0) << "     Reason: " << reason;
             },
-            [](web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>::SocketConnection* socketConnection)
-                -> void {
+            [](SocketConnectionLegacy* socketConnection) -> void {
                 VLOG(0) << "OnDisconnect";
 
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             });
 
-        legacyClient.connect(
-            "localhost",
-            8080,
-            [](const web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>::SocketAddress& socketAddress,
-               const core::socket::State& state) -> void {
-                switch (state) {
-                    case core::socket::State::OK:
-                        VLOG(1) << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
-                        break;
-                    case core::socket::State::DISABLED:
-                        VLOG(1) << "legacy: disabled";
-                        break;
-                    case core::socket::State::ERROR:
-                        VLOG(1) << "legacy: " << socketAddress.toString() << ": non critical error occurred";
-                        VLOG(1) << "    " << state.what();
-                        break;
-                    case core::socket::State::FATAL:
-                        VLOG(1) << "legacy: " << socketAddress.toString() << ": critical error occurred";
-                        VLOG(1) << "    " << state.what();
-                        break;
-                }
-            }); // Connection:keep-alive\r\n\r\n"
+        legacyClient.connect("localhost", 8080, [](const SocketAddressLegacy& socketAddress, const core::socket::State& state) -> void {
+            switch (state) {
+                case core::socket::State::OK:
+                    VLOG(1) << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
+                    break;
+                case core::socket::State::DISABLED:
+                    VLOG(1) << "legacy: disabled";
+                    break;
+                case core::socket::State::ERROR:
+                    VLOG(1) << "legacy: " << socketAddress.toString() << ": non critical error occurred";
+                    VLOG(1) << "    " << state.what();
+                    break;
+                case core::socket::State::FATAL:
+                    VLOG(1) << "legacy: " << socketAddress.toString() << ": critical error occurred";
+                    VLOG(1) << "    " << state.what();
+                    break;
+            }
+        }); // Connection:keep-alive\r\n\r\n"
+
+        using EchoClientTls = web::http::tls::in::Client;
+        using SocketConnectionTLS = EchoClientTls::SocketConnection;
+        using Request = EchoClientTls::Request;
+        using Response = EchoClientTls::Response;
+        using SocketAddressTLS = EchoClientTls::SocketAddress;
 
         std::map<std::string, std::any> options;
         options["CertChain"] = "/home/voc/projects/websocket-echo/certs/WebServerCertificateChain.pem";
@@ -137,17 +142,15 @@ int main(int argc, char* argv[]) {
         options["Password"] = "pentium5";
         options["CaFile"] = "/home/voc/projects/websocket-echo/certs/Client-Root-CA.crt";
 
-        web::http::tls::in::Client<web::http::client::Request, web::http::client::Response> tlsClient(
+        EchoClientTls tlsClient(
             "tls",
-            [](web::http::tls::in::Client<web::http::client::Request, web::http::client::Response>::SocketConnection* socketConnection)
-                -> void {
+            [](SocketConnectionTLS* socketConnection) -> void {
                 VLOG(0) << "OnConnect";
 
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
-            [](web::http::tls::in::Client<web::http::client::Request, web::http::client::Response>::SocketConnection* socketConnection)
-                -> void {
+            [](SocketConnectionTLS* socketConnection) -> void {
                 VLOG(0) << "OnConnected";
                 X509* server_cert = SSL_get_peer_certificate(socketConnection->getSSL());
                 if (server_cert != nullptr) {
@@ -194,14 +197,14 @@ int main(int argc, char* argv[]) {
                     VLOG(0) << "     Server certificate: no certificate";
                 }
             },
-            [](web::http::client::Request& request) -> void {
+            [](Request& request) -> void {
                 VLOG(0) << "OnRequestBegin";
 
                 request.set("Sec-WebSocket-Protocol", "test, echo");
 
                 request.upgrade("/ws/", "websocket");
             },
-            [](web::http::client::Request& request, web::http::client::Response& response) -> void {
+            [](Request& request, Response& response) -> void {
                 VLOG(0) << "OnResponse";
                 VLOG(0) << "     Status:";
                 VLOG(0) << "       " << response.httpVersion << " " << response.statusCode << " " << response.reason;
@@ -229,36 +232,31 @@ int main(int argc, char* argv[]) {
                 VLOG(0) << "     Status: " << status;
                 VLOG(0) << "     Reason: " << reason;
             },
-            [](web::http::tls::in::Client<web::http::client::Request, web::http::client::Response>::SocketConnection* socketConnection)
-                -> void {
+            [](SocketConnectionTLS* socketConnection) -> void {
                 VLOG(0) << "OnDisconnect";
 
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             });
 
-        tlsClient.connect(
-            "localhost",
-            8088,
-            [](const web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>::SocketAddress& socketAddress,
-               const core::socket::State& state) -> void {
-                switch (state) {
-                    case core::socket::State::OK:
-                        VLOG(1) << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
-                        break;
-                    case core::socket::State::DISABLED:
-                        VLOG(1) << "legacy: disabled";
-                        break;
-                    case core::socket::State::ERROR:
-                        VLOG(1) << "legacy: " << socketAddress.toString() << ": non critical error occurred";
-                        VLOG(1) << "    " << state.what();
-                        break;
-                    case core::socket::State::FATAL:
-                        VLOG(1) << "legacy: " << socketAddress.toString() << ": critical error occurred";
-                        VLOG(1) << "    " << state.what();
-                        break;
-                }
-            }); // Connection:keep-alive\r\n\r\n"
+        tlsClient.connect("localhost", 8088, [](const SocketAddressTLS& socketAddress, const core::socket::State& state) -> void {
+            switch (state) {
+                case core::socket::State::OK:
+                    VLOG(1) << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
+                    break;
+                case core::socket::State::DISABLED:
+                    VLOG(1) << "legacy: disabled";
+                    break;
+                case core::socket::State::ERROR:
+                    VLOG(1) << "legacy: " << socketAddress.toString() << ": non critical error occurred";
+                    VLOG(1) << "    " << state.what();
+                    break;
+                case core::socket::State::FATAL:
+                    VLOG(1) << "legacy: " << socketAddress.toString() << ": critical error occurred";
+                    VLOG(1) << "    " << state.what();
+                    break;
+            }
+        }); // Connection:keep-alive\r\n\r\n"
     }
 
     return core::SNodeC::start();
