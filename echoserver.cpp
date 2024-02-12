@@ -38,38 +38,44 @@ int main(int argc, char* argv[]) {
     legacy::in::WebApp legacyApp("legacy");
 
     legacyApp.get("/", [] APPLICATION(req, res) {
-        if (req.url == "/" || req.url == "/index.html") {
-            req.url = "/wstest.html";
+        if (req->url == "/" || req->url == "/index.html") {
+            req->url = "/wstest.html";
         }
 
-        VLOG(0) << CMAKE_CURRENT_SOURCE_DIR "/html" + req.url;
-        res.sendFile(CMAKE_CURRENT_SOURCE_DIR "/html" + req.url, [&req](int ret) -> void {
+        VLOG(0) << CMAKE_CURRENT_SOURCE_DIR "/html" + req->url;
+        res->sendFile(CMAKE_CURRENT_SOURCE_DIR "/html" + req->url, [&req](int ret) -> void {
             if (ret != 0) {
-                PLOG(ERROR) << req.url;
+                PLOG(ERROR) << req->url;
             }
         });
     });
 
-    legacyApp.get("/ws", [](Request& req, Response& res) -> void {
-        std::string uri = req.originalUrl;
+    legacyApp.get("/ws", [](std::shared_ptr<Request> req, std::shared_ptr<Response> res) -> void {
+        std::string uri = req->originalUrl;
 
         VLOG(1) << "OriginalUri: " << uri;
-        VLOG(1) << "Uri: " << req.url;
+        VLOG(1) << "Uri: " << req->url;
 
-        VLOG(1) << "Host: " << req.get("host");
-        VLOG(1) << "Connection: " << req.get("connection");
-        VLOG(1) << "Origin: " << req.get("origin");
-        VLOG(1) << "Sec-WebSocket-Protocol: " << req.get("sec-websocket-protocol");
-        VLOG(1) << "sec-web-socket-extensions: " << req.get("sec-websocket-extensions");
-        VLOG(1) << "sec-websocket-key: " << req.get("sec-websocket-key");
-        VLOG(1) << "sec-websocket-version: " << req.get("sec-websocket-version");
-        VLOG(1) << "upgrade: " << req.get("upgrade");
-        VLOG(1) << "user-agent: " << req.get("user-agent");
+        VLOG(1) << "Host: " << req->get("host");
+        VLOG(1) << "Connection: " << req->get("connection");
+        VLOG(1) << "Origin: " << req->get("origin");
+        VLOG(1) << "Sec-WebSocket-Protocol: " << req->get("sec-websocket-protocol");
+        VLOG(1) << "sec-web-socket-extensions: " << req->get("sec-websocket-extensions");
+        VLOG(1) << "sec-websocket-key: " << req->get("sec-websocket-key");
+        VLOG(1) << "sec-websocket-version: " << req->get("sec-websocket-version");
+        VLOG(1) << "upgrade: " << req->get("upgrade");
+        VLOG(1) << "user-agent: " << req->get("user-agent");
 
-        if (httputils::ci_contains(req.get("connection"), "Upgrade")) {
-            res.upgrade(req);
+        if (httputils::ci_contains(req->get("connection"), "Upgrade")) {
+            res->upgrade(req, [](bool success) -> void {
+                if (success) {
+                    VLOG(1) << "Upgrade successfull";
+                } else {
+                    VLOG(1) << "Upgrade failed";
+                }
+            });
         } else {
-            res.sendStatus(404);
+            res->sendStatus(404);
         }
     });
 
@@ -95,38 +101,44 @@ int main(int argc, char* argv[]) {
         tls::in::WebApp tlsApp("tls");
 
         tlsApp.get("/", [] APPLICATION(req, res) {
-            if (req.url == "/" || req.url == "/index.html") {
-                req.url = "/wstest.html";
+            if (req->url == "/" || req->url == "/index.html") {
+                req->url = "/wstest.html";
             }
 
-            VLOG(0) << CMAKE_CURRENT_SOURCE_DIR "/html" + req.url;
-            res.sendFile(CMAKE_CURRENT_SOURCE_DIR "/html" + req.url, [&req](int ret) -> void {
+            VLOG(0) << CMAKE_CURRENT_SOURCE_DIR "/html" + req->url;
+            res->sendFile(CMAKE_CURRENT_SOURCE_DIR "/html" + req->url, [&req](int ret) -> void {
                 if (ret != 0) {
-                    PLOG(ERROR) << req.url;
+                    PLOG(ERROR) << req->url;
                 }
             });
         });
 
-        tlsApp.get("/ws", [](Request& req, Response& res) -> void {
-            std::string uri = req.originalUrl;
+        tlsApp.get("/ws", [](std::shared_ptr<Request> req, std::shared_ptr<Response> res) -> void {
+            std::string uri = req->originalUrl;
 
             VLOG(1) << "OriginalUri: " << uri;
-            VLOG(1) << "Uri: " << req.url;
+            VLOG(1) << "Uri: " << req->url;
 
-            VLOG(1) << "Connection: " << req.get("connection");
-            VLOG(1) << "Host: " << req.get("host");
-            VLOG(1) << "Origin: " << req.get("origin");
-            VLOG(1) << "Sec-WebSocket-Protocol: " << req.get("sec-websocket-protocol");
-            VLOG(1) << "sec-web-socket-extensions: " << req.get("sec-websocket-extensions");
-            VLOG(1) << "sec-websocket-key: " << req.get("sec-websocket-key");
-            VLOG(1) << "sec-websocket-version: " << req.get("sec-websocket-version");
-            VLOG(1) << "upgrade: " << req.get("upgrade");
-            VLOG(1) << "user-agent: " << req.get("user-agent");
+            VLOG(1) << "Connection: " << req->get("connection");
+            VLOG(1) << "Host: " << req->get("host");
+            VLOG(1) << "Origin: " << req->get("origin");
+            VLOG(1) << "Sec-WebSocket-Protocol: " << req->get("sec-websocket-protocol");
+            VLOG(1) << "sec-web-socket-extensions: " << req->get("sec-websocket-extensions");
+            VLOG(1) << "sec-websocket-key: " << req->get("sec-websocket-key");
+            VLOG(1) << "sec-websocket-version: " << req->get("sec-websocket-version");
+            VLOG(1) << "upgrade: " << req->get("upgrade");
+            VLOG(1) << "user-agent: " << req->get("user-agent");
 
-            if (httputils::ci_contains(req.get("connection"), "Upgrade")) {
-                res.upgrade(req);
+            if (httputils::ci_contains(req->get("connection"), "Upgrade")) {
+                res->upgrade(req, [](bool success) -> void {
+                    if (success) {
+                        VLOG(1) << "Upgrade successfull";
+                    } else {
+                        VLOG(1) << "Upgrade failed";
+                    }
+                });
             } else {
-                res.sendStatus(404);
+                res->sendStatus(404);
             }
         });
 

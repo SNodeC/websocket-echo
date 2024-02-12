@@ -20,23 +20,15 @@
 
 #include "core/SNodeC.h"               // for SNodeC
 #include "log/Logger.h"                // for Writer, Storage
-#include "web/http/client/Request.h"   // for Request, client
-#include "web/http/client/Response.h"  // for Response
 #include "web/http/legacy/in/Client.h" // for Client, Client<>...
 #include "web/http/tls/in/Client.h"    // for Client, Client<>...
 
-#include <any>
-#include <cstdint>
 #include <cstdlib>
-#include <functional>
-#include <map>
 #include <openssl/ssl.h> // IWYU pragma: keep
 #include <openssl/x509v3.h>
 #include <string>
 #include <utility>
-#include <vector>
 
-// IWYU pragma: no_include <bits/utility.h>
 // IWYU pragma: no_include <openssl/asn1.h>
 // IWYU pragma: no_include <openssl/crypto.h>
 // IWYU pragma: no_include <openssl/obj_mac.h>
@@ -69,35 +61,35 @@ int main(int argc, char* argv[]) {
             []([[maybe_unused]] SocketConnectionLegacy* socketConnection) -> void {
                 VLOG(0) << "OnConnected";
             },
-            [](Request& request) -> void {
+            [](std::shared_ptr<Request>& request) -> void {
                 VLOG(0) << "OnRequestBegin";
 
-                request.set("Sec-WebSocket-Protocol", "test, echo");
+                request->set("Sec-WebSocket-Protocol", "test, echo");
 
-                request.upgrade("/ws/", "websocket");
+                request->upgrade("/ws/", "websocket");
             },
-            [](Request& request, Response& response) -> void {
+            [](std::shared_ptr<Request>& request, std::shared_ptr<Response>& response) -> void {
                 VLOG(0) << "OnResponse";
                 VLOG(0) << "     Status:";
-                VLOG(0) << "       " << response.httpVersion << " " << response.statusCode << " " << response.reason;
+                VLOG(0) << "       " << response->httpVersion << " " << response->statusCode << " " << response->reason;
 
                 VLOG(0) << "     Headers:";
-                for (const auto& [field, value] : response.headers) {
+                for (const auto& [field, value] : response->headers) {
                     VLOG(0) << "       " << field + " = " + value;
                 }
 
                 VLOG(0) << "     Cookies:";
-                for (const auto& [name, cookie] : response.cookies) {
+                for (const auto& [name, cookie] : response->cookies) {
                     VLOG(0) << "       " + name + " = " + cookie.getValue();
                     for (const auto& [option, value] : cookie.getOptions()) {
                         VLOG(0) << "         " + option + " = " + value;
                     }
                 }
 
-                response.body.push_back(0); // make it a c-string
-                VLOG(0) << "Body:\n----------- start body -----------\n" << response.body.data() << "\n------------ end body ------------";
+                response->body.push_back(0); // make it a c-string
+                VLOG(0) << "Body:\n----------- start body -----------\n" << response->body.data() << "\n------------ end body ------------";
 
-                response.upgrade(request);
+                request->upgrade(response);
             },
             [](int status, const std::string& reason) -> void {
                 VLOG(0) << "OnResponseError";
@@ -135,12 +127,6 @@ int main(int argc, char* argv[]) {
         using Request = EchoClientTls::Request;
         using Response = EchoClientTls::Response;
         using SocketAddressTLS = EchoClientTls::SocketAddress;
-
-        std::map<std::string, std::any> options;
-        options["CertChain"] = "/home/voc/projects/websocket-echo/certs/WebServerCertificateChain.pem";
-        options["CertChainKey"] = "/home/voc/projects/websocket-echo/certs/Volker_Christian_-_WEB-Cert.pem";
-        options["Password"] = "pentium5";
-        options["CaFile"] = "/home/voc/projects/websocket-echo/certs/Client-Root-CA.crt";
 
         EchoClientTls tlsClient(
             "tls",
@@ -197,35 +183,35 @@ int main(int argc, char* argv[]) {
                     VLOG(0) << "     Server certificate: no certificate";
                 }
             },
-            [](Request& request) -> void {
+            [](std::shared_ptr<Request>& request) -> void {
                 VLOG(0) << "OnRequestBegin";
 
-                request.set("Sec-WebSocket-Protocol", "test, echo");
+                request->set("Sec-WebSocket-Protocol", "test, echo");
 
-                request.upgrade("/ws/", "websocket");
+                request->upgrade("/ws/", "websocket");
             },
-            [](Request& request, Response& response) -> void {
+            [](std::shared_ptr<Request>& request, std::shared_ptr<Response>& response) -> void {
                 VLOG(0) << "OnResponse";
                 VLOG(0) << "     Status:";
-                VLOG(0) << "       " << response.httpVersion << " " << response.statusCode << " " << response.reason;
+                VLOG(0) << "       " << response->httpVersion << " " << response->statusCode << " " << response->reason;
 
                 VLOG(0) << "     Headers:";
-                for (const auto& [field, value] : response.headers) {
+                for (const auto& [field, value] : response->headers) {
                     VLOG(0) << "       " << field + " = " + value;
                 }
 
                 VLOG(0) << "     Cookies:";
-                for (const auto& [name, cookie] : response.cookies) {
+                for (const auto& [name, cookie] : response->cookies) {
                     VLOG(0) << "       " + name + " = " + cookie.getValue();
                     for (const auto& [option, value] : cookie.getOptions()) {
                         VLOG(0) << "         " + option + " = " + value;
                     }
                 }
 
-                response.body.push_back(0); // make it a c-string
-                VLOG(0) << "Body:\n----------- start body -----------\n" << response.body.data() << "\n------------ end body ------------";
+                response->body.push_back(0); // make it a c-string
+                VLOG(0) << "Body:\n----------- start body -----------\n" << response->body.data() << "\n------------ end body ------------";
 
-                response.upgrade(request);
+                request->upgrade(response);
             },
             [](int status, const std::string& reason) -> void {
                 VLOG(0) << "OnResponseError";
