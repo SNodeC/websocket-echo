@@ -61,46 +61,55 @@ int main(int argc, char* argv[]) {
             []([[maybe_unused]] SocketConnectionLegacy* socketConnection) -> void {
                 VLOG(0) << "OnConnected";
             },
-            [](std::shared_ptr<Request>& request) -> void {
+            [](SocketConnectionLegacy* socketConnection) -> void {
+                VLOG(0) << "OnDisconnect";
+
+                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+            },
+            [](const std::shared_ptr<Request>& request) -> void {
                 VLOG(0) << "OnRequestBegin";
 
                 request->set("Sec-WebSocket-Protocol", "test, echo");
 
-                request->upgrade("/ws/", "websocket");
-            },
-            [](std::shared_ptr<Request>& request, std::shared_ptr<Response>& response) -> void {
-                VLOG(0) << "OnResponse";
-                VLOG(0) << "     Status:";
-                VLOG(0) << "       " << response->httpVersion << " " << response->statusCode << " " << response->reason;
+                request->upgrade(
+                    "/ws/", "websocket", [](const std::shared_ptr<Request>& req, const std::shared_ptr<Response>& res) -> void {
+                        VLOG(1) << "OnResponse";
+                        VLOG(2) << "     Status:";
+                        VLOG(2) << "       " << res->httpVersion << " " << res->statusCode << " " << res->reason;
 
-                VLOG(0) << "     Headers:";
-                for (const auto& [field, value] : response->headers) {
-                    VLOG(0) << "       " << field + " = " + value;
-                }
+                        VLOG(2) << "     Headers:";
+                        for (const auto& [field, value] : res->headers) {
+                            VLOG(2) << "       " << field + " = " + value;
+                        }
 
-                VLOG(0) << "     Cookies:";
-                for (const auto& [name, cookie] : response->cookies) {
-                    VLOG(0) << "       " + name + " = " + cookie.getValue();
-                    for (const auto& [option, value] : cookie.getOptions()) {
-                        VLOG(0) << "         " + option + " = " + value;
-                    }
-                }
+                        VLOG(2) << "     Cookies:";
+                        for (const auto& [name, cookie] : res->cookies) {
+                            VLOG(2) << "       " + name + " = " + cookie.getValue();
+                            for (const auto& [option, value] : cookie.getOptions()) {
+                                VLOG(2) << "         " + option + " = " + value;
+                            }
+                        }
 
-                response->body.push_back(0); // make it a c-string
-                VLOG(0) << "Body:\n----------- start body -----------\n" << response->body.data() << "\n------------ end body ------------";
-
-                request->upgrade(response);
+                        req->upgrade(res,
+                                     [&subProtocolsRequested = req->headers["Upgrade"],
+                                      &subProtocol = res->headers["upgrade"]](bool success) -> void {
+                                         if (success) {
+                                             VLOG(1)
+                                                 << "Successful upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                         } else {
+                                             VLOG(1) << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                         }
+                                     });
+                    });
             },
             [](int status, const std::string& reason) -> void {
                 VLOG(0) << "OnResponseError";
                 VLOG(0) << "     Status: " << status;
                 VLOG(0) << "     Reason: " << reason;
             },
-            [](SocketConnectionLegacy* socketConnection) -> void {
-                VLOG(0) << "OnDisconnect";
-
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+            [](const std::shared_ptr<Request>& request) -> void {
+                VLOG(0) << "OnRequestEnd";
             });
 
         legacyClient.connect("localhost", 8080, [](const SocketAddressLegacy& socketAddress, const core::socket::State& state) -> void {
@@ -183,46 +192,55 @@ int main(int argc, char* argv[]) {
                     VLOG(0) << "     Server certificate: no certificate";
                 }
             },
-            [](std::shared_ptr<Request>& request) -> void {
+            [](SocketConnectionTLS* socketConnection) -> void {
+                VLOG(0) << "OnDisconnect";
+
+                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+            },
+            [](const std::shared_ptr<Request>& request) -> void {
                 VLOG(0) << "OnRequestBegin";
 
                 request->set("Sec-WebSocket-Protocol", "test, echo");
 
-                request->upgrade("/ws/", "websocket");
-            },
-            [](std::shared_ptr<Request>& request, std::shared_ptr<Response>& response) -> void {
-                VLOG(0) << "OnResponse";
-                VLOG(0) << "     Status:";
-                VLOG(0) << "       " << response->httpVersion << " " << response->statusCode << " " << response->reason;
+                request->upgrade(
+                    "/ws/", "websocket", [](const std::shared_ptr<Request>& req, const std::shared_ptr<Response>& res) -> void {
+                        VLOG(1) << "OnResponse";
+                        VLOG(2) << "     Status:";
+                        VLOG(2) << "       " << res->httpVersion << " " << res->statusCode << " " << res->reason;
 
-                VLOG(0) << "     Headers:";
-                for (const auto& [field, value] : response->headers) {
-                    VLOG(0) << "       " << field + " = " + value;
-                }
+                        VLOG(2) << "     Headers:";
+                        for (const auto& [field, value] : res->headers) {
+                            VLOG(2) << "       " << field + " = " + value;
+                        }
 
-                VLOG(0) << "     Cookies:";
-                for (const auto& [name, cookie] : response->cookies) {
-                    VLOG(0) << "       " + name + " = " + cookie.getValue();
-                    for (const auto& [option, value] : cookie.getOptions()) {
-                        VLOG(0) << "         " + option + " = " + value;
-                    }
-                }
+                        VLOG(2) << "     Cookies:";
+                        for (const auto& [name, cookie] : res->cookies) {
+                            VLOG(2) << "       " + name + " = " + cookie.getValue();
+                            for (const auto& [option, value] : cookie.getOptions()) {
+                                VLOG(2) << "         " + option + " = " + value;
+                            }
+                        }
 
-                response->body.push_back(0); // make it a c-string
-                VLOG(0) << "Body:\n----------- start body -----------\n" << response->body.data() << "\n------------ end body ------------";
-
-                request->upgrade(response);
+                        req->upgrade(res,
+                                     [&subProtocolsRequested = req->headers["Upgrade"],
+                                      &subProtocol = res->headers["upgrade"]](bool success) -> void {
+                                         if (success) {
+                                             VLOG(1)
+                                                 << "Successful upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                         } else {
+                                             VLOG(1) << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                         }
+                                     });
+                    });
             },
             [](int status, const std::string& reason) -> void {
                 VLOG(0) << "OnResponseError";
                 VLOG(0) << "     Status: " << status;
                 VLOG(0) << "     Reason: " << reason;
             },
-            [](SocketConnectionTLS* socketConnection) -> void {
-                VLOG(0) << "OnDisconnect";
-
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+            [](const std::shared_ptr<Request>& request) -> void {
+                VLOG(0) << "OnRequestEnd";
             });
 
         tlsClient.connect("localhost", 8088, [](const SocketAddressTLS& socketAddress, const core::socket::State& state) -> void {
