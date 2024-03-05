@@ -21,7 +21,6 @@
 #include "express/legacy/in/WebApp.h"
 #include "express/tls/in/WebApp.h"
 #include "log/Logger.h"
-#include "web/http/http_utils.h" // for ci_contains
 
 #include <cstdlib>
 #include <string>
@@ -66,7 +65,7 @@ int main(int argc, char* argv[]) {
         VLOG(1) << "upgrade: " << req->get("upgrade");
         VLOG(1) << "user-agent: " << req->get("user-agent");
 
-        if (httputils::ci_contains(req->get("connection"), "Upgrade")) {
+        if (web::http::ciContains(req->get("connection"), "Upgrade")) {
             res->upgrade(req, [](bool success) -> void {
                 if (success) {
                     VLOG(1) << "Upgrade successfull";
@@ -129,7 +128,7 @@ int main(int argc, char* argv[]) {
             VLOG(1) << "upgrade: " << req->get("upgrade");
             VLOG(1) << "user-agent: " << req->get("user-agent");
 
-            if (httputils::ci_contains(req->get("connection"), "Upgrade")) {
+            if (web::http::ciContains(req->get("connection"), "Upgrade")) {
                 res->upgrade(req, [](bool success) -> void {
                     if (success) {
                         VLOG(1) << "Upgrade successfull";

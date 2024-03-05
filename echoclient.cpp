@@ -91,16 +91,15 @@ int main(int argc, char* argv[]) {
                             }
                         }
 
-                        req->upgrade(res,
-                                     [&subProtocolsRequested = req->headers["Upgrade"],
-                                      &subProtocol = res->headers["upgrade"]](bool success) -> void {
-                                         if (success) {
-                                             VLOG(1)
-                                                 << "Successful upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
-                                         } else {
-                                             VLOG(1) << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
-                                         }
-                                     });
+                        req->upgrade(
+                            res,
+                            [subProtocolsRequested = req->header("Upgrade"), &subProtocol = res->headers["upgrade"]](bool success) -> void {
+                                if (success) {
+                                    VLOG(1) << "Successful upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                } else {
+                                    VLOG(1) << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                }
+                            });
                     });
             },
             [](int status, const std::string& reason) -> void {
@@ -222,16 +221,15 @@ int main(int argc, char* argv[]) {
                             }
                         }
 
-                        req->upgrade(res,
-                                     [&subProtocolsRequested = req->headers["Upgrade"],
-                                      &subProtocol = res->headers["upgrade"]](bool success) -> void {
-                                         if (success) {
-                                             VLOG(1)
-                                                 << "Successful upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
-                                         } else {
-                                             VLOG(1) << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
-                                         }
-                                     });
+                        req->upgrade(
+                            res,
+                            [subProtocolsRequested = req->header("Upgrade"), &subProtocol = res->headers["upgrade"]](bool success) -> void {
+                                if (success) {
+                                    VLOG(1) << "Successful upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                } else {
+                                    VLOG(1) << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                }
+                            });
                     });
             },
             [](int status, const std::string& reason) -> void {
