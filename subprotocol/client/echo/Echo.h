@@ -29,7 +29,7 @@ namespace web::websocket {
 
 #include <cstddef> // for std::size_t
 #include <cstdint> // for uint16_t
-#include <string>  // for allocator, string
+#include <string>  // for string, basic_string
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 

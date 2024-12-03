@@ -27,7 +27,6 @@
 #include <openssl/ssl.h> // IWYU pragma: keep
 #include <openssl/x509v3.h>
 #include <string>
-#include <utility>
 
 // IWYU pragma: no_include <openssl/asn1.h>
 // IWYU pragma: no_include <openssl/crypto.h>
