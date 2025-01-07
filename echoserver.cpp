@@ -66,12 +66,13 @@ int main(int argc, char* argv[]) {
         VLOG(1) << "user-agent: " << req->get("user-agent");
 
         if (web::http::ciContains(req->get("connection"), "Upgrade")) {
-            res->upgrade(req, [](bool success) -> void {
-                if (success) {
-                    VLOG(1) << "Upgrade successfull";
+            res->upgrade(req, [&subProtocolsRequested = req->get("upgrade"), res](const std::string& name) -> void {
+                if (!name.empty()) {
+                    VLOG(1) << "Successful upgrade to '" << name << "'  requested: " << subProtocolsRequested;
                 } else {
-                    VLOG(1) << "Upgrade failed";
+                    VLOG(1) << "Can not upgrade to any of '" << subProtocolsRequested << "'";
                 }
+                res->end();
             });
         } else {
             res->sendStatus(404);
@@ -129,12 +130,13 @@ int main(int argc, char* argv[]) {
             VLOG(1) << "user-agent: " << req->get("user-agent");
 
             if (web::http::ciContains(req->get("connection"), "Upgrade")) {
-                res->upgrade(req, [](bool success) -> void {
-                    if (success) {
-                        VLOG(1) << "Upgrade successfull";
+                res->upgrade(req, [&subProtocolsRequested = req->get("upgrade"), res](const std::string& name) -> void {
+                    if (!name.empty()) {
+                        VLOG(1) << "Successful upgrade to '" << name << "'  requested: " << subProtocolsRequested;
                     } else {
-                        VLOG(1) << "Upgrade failed";
+                        VLOG(1) << "Can not upgrade to any of '" << subProtocolsRequested << "'";
                     }
+                    res->end();
                 });
             } else {
                 res->sendStatus(404);
