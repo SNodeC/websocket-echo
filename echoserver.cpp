@@ -22,7 +22,6 @@
 #include "express/tls/in/WebApp.h"
 #include "log/Logger.h"
 
-#include <cstdlib>
 #include <string>
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
@@ -31,8 +30,6 @@ using namespace express;
 
 int main(int argc, char* argv[]) {
     express::WebApp::init(argc, argv);
-
-    setenv("DL_WSSERVER_SUBPROTOCOL_PATH", CMAKE_CURRENT_BINARY_DIR "/subprotocol/server/echo", 0);
 
     legacy::in::WebApp legacyApp("legacy");
 

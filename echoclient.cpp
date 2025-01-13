@@ -23,7 +23,7 @@
 #include "web/http/legacy/in/Client.h" // for Client, Client<>...
 #include "web/http/tls/in/Client.h"    // for Client, Client<>...
 
-#include <cstdlib>
+#include <cstddef>
 #include <openssl/ssl.h> // IWYU pragma: keep
 #include <openssl/x509v3.h>
 #include <string>
@@ -40,8 +40,6 @@
 int main(int argc, char* argv[]) {
     core::SNodeC::init(argc, argv);
 
-    setenv("DL_WSCLIENT_SUBPROTOCOL_PATH", CMAKE_CURRENT_BINARY_DIR "/subprotocol/client/echo", 0);
-
     {
         using EchoClientLegacy = web::http::legacy::in::Client;
         using SocketConnectionLegacy = EchoClientLegacy::SocketConnection;
@@ -51,16 +49,19 @@ int main(int argc, char* argv[]) {
 
         EchoClientLegacy legacyClient(
             "legacy",
-            [](SocketConnectionLegacy* socketConnection) -> void {
+            [](const SocketConnectionLegacy* socketConnection) -> void {
                 VLOG(0) << "OnConnect";
 
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
-            []([[maybe_unused]] SocketConnectionLegacy* socketConnection) -> void {
+            [](const SocketConnectionLegacy* socketConnection) -> void {
                 VLOG(0) << "OnConnected";
+
+                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
-            [](SocketConnectionLegacy* socketConnection) -> void {
+            [](const SocketConnectionLegacy* socketConnection) -> void {
                 VLOG(0) << "OnDisconnect";
 
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
@@ -133,13 +134,13 @@ int main(int argc, char* argv[]) {
 
         EchoClientTls tlsClient(
             "tls",
-            [](SocketConnectionTLS* socketConnection) -> void {
+            [](const SocketConnectionTLS* socketConnection) -> void {
                 VLOG(0) << "OnConnect";
 
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                 VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
-            [](SocketConnectionTLS* socketConnection) -> void {
+            [](const SocketConnectionTLS* socketConnection) -> void {
                 VLOG(0) << "OnConnected";
                 X509* server_cert = SSL_get_peer_certificate(socketConnection->getSSL());
                 if (server_cert != nullptr) {
@@ -186,7 +187,7 @@ int main(int argc, char* argv[]) {
                     VLOG(0) << "     Server certificate: no certificate";
                 }
             },
-            [](SocketConnectionTLS* socketConnection) -> void {
+            [](const SocketConnectionTLS* socketConnection) -> void {
                 VLOG(0) << "OnDisconnect";
 
                 VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
