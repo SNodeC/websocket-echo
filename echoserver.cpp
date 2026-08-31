@@ -20,7 +20,7 @@
 
 #include "express/legacy/in/WebApp.h"
 #include "express/tls/in/WebApp.h"
-#include "log/Logger.h"
+#include <SemanticLog.h>
 
 #include <string>
 
@@ -38,10 +38,10 @@ int main(int argc, char* argv[]) {
             req->url = "/wstest.html";
         }
 
-        VLOG(0) << CMAKE_CURRENT_SOURCE_DIR "/html" + req->url;
+        snode::semantic::appLog().debug() << CMAKE_CURRENT_SOURCE_DIR "/html" + req->url;
         res->sendFile(CMAKE_CURRENT_SOURCE_DIR "/html" + req->url, [&req](int ret) -> void {
             if (ret != 0) {
-                PLOG(ERROR) << req->url;
+                snode::semantic::sysError(snode::semantic::appLog(), logger::LogLevel::Error, ret) << req->url;
             }
         });
     });
@@ -49,25 +49,25 @@ int main(int argc, char* argv[]) {
     legacyApp.get("/ws", [](std::shared_ptr<Request> req, std::shared_ptr<Response> res) -> void {
         std::string uri = req->originalUrl;
 
-        VLOG(1) << "OriginalUri: " << uri;
-        VLOG(1) << "Uri: " << req->url;
+        snode::semantic::appLog().debug() << "OriginalUri: " << uri;
+        snode::semantic::appLog().debug() << "Uri: " << req->url;
 
-        VLOG(1) << "Host: " << req->get("host");
-        VLOG(1) << "Connection: " << req->get("connection");
-        VLOG(1) << "Origin: " << req->get("origin");
-        VLOG(1) << "Sec-WebSocket-Protocol: " << req->get("sec-websocket-protocol");
-        VLOG(1) << "sec-web-socket-extensions: " << req->get("sec-websocket-extensions");
-        VLOG(1) << "sec-websocket-key: " << req->get("sec-websocket-key");
-        VLOG(1) << "sec-websocket-version: " << req->get("sec-websocket-version");
-        VLOG(1) << "upgrade: " << req->get("upgrade");
-        VLOG(1) << "user-agent: " << req->get("user-agent");
+        snode::semantic::appLog().debug() << "Host: " << req->get("host");
+        snode::semantic::appLog().debug() << "Connection: " << req->get("connection");
+        snode::semantic::appLog().debug() << "Origin: " << req->get("origin");
+        snode::semantic::appLog().debug() << "Sec-WebSocket-Protocol: " << req->get("sec-websocket-protocol");
+        snode::semantic::appLog().debug() << "sec-web-socket-extensions: " << req->get("sec-websocket-extensions");
+        snode::semantic::appLog().debug() << "sec-websocket-key: " << req->get("sec-websocket-key");
+        snode::semantic::appLog().debug() << "sec-websocket-version: " << req->get("sec-websocket-version");
+        snode::semantic::appLog().debug() << "upgrade: " << req->get("upgrade");
+        snode::semantic::appLog().debug() << "user-agent: " << req->get("user-agent");
 
         if (web::http::ciContains(req->get("connection"), "Upgrade")) {
             res->upgrade(req, [&subProtocolsRequested = req->get("upgrade"), res](const std::string& name) -> void {
                 if (!name.empty()) {
-                    VLOG(1) << "Successful upgrade to '" << name << "'  requested: " << subProtocolsRequested;
+                    snode::semantic::appLog().debug() << "Successful upgrade to '" << name << "'  requested: " << subProtocolsRequested;
                 } else {
-                    VLOG(1) << "Can not upgrade to any of '" << subProtocolsRequested << "'";
+                    snode::semantic::appLog().warn() << "Can not upgrade to any of '" << subProtocolsRequested << "'";
                 }
                 res->end();
             });
@@ -80,16 +80,16 @@ int main(int argc, char* argv[]) {
                         const core::socket::State& state) -> void { // Listen on all bluetooth interfaces on channel 16{
         switch (state) {
             case core::socket::State::OK:
-                VLOG(1) << "legacy: listening on '" << socketAddress.toString() << "'";
+                snode::semantic::appLog().info() << "legacy: listening on '" << socketAddress.toString() << "'";
                 break;
             case core::socket::State::DISABLED:
-                VLOG(1) << "legacy: disabled";
+                snode::semantic::appLog().info() << "legacy: disabled";
                 break;
             case core::socket::State::ERROR:
-                VLOG(1) << "legacy: non critical error occurred";
+                snode::semantic::appLog().warn() << "legacy: non critical error occurred";
                 break;
             case core::socket::State::FATAL:
-                VLOG(1) << "legacy: critical error occurred";
+                snode::semantic::appLog().critical() << "legacy: critical error occurred";
                 break;
         }
     });
@@ -102,10 +102,10 @@ int main(int argc, char* argv[]) {
                 req->url = "/wstest.html";
             }
 
-            VLOG(0) << CMAKE_CURRENT_SOURCE_DIR "/html" + req->url;
+            snode::semantic::appLog().debug() << CMAKE_CURRENT_SOURCE_DIR "/html" + req->url;
             res->sendFile(CMAKE_CURRENT_SOURCE_DIR "/html" + req->url, [&req](int ret) -> void {
                 if (ret != 0) {
-                    PLOG(ERROR) << req->url;
+                    snode::semantic::sysError(snode::semantic::appLog(), logger::LogLevel::Error, ret) << req->url;
                 }
             });
         });
@@ -113,25 +113,25 @@ int main(int argc, char* argv[]) {
         tlsApp.get("/ws", [](std::shared_ptr<Request> req, std::shared_ptr<Response> res) -> void {
             std::string uri = req->originalUrl;
 
-            VLOG(1) << "OriginalUri: " << uri;
-            VLOG(1) << "Uri: " << req->url;
+            snode::semantic::appLog().debug() << "OriginalUri: " << uri;
+            snode::semantic::appLog().debug() << "Uri: " << req->url;
 
-            VLOG(1) << "Connection: " << req->get("connection");
-            VLOG(1) << "Host: " << req->get("host");
-            VLOG(1) << "Origin: " << req->get("origin");
-            VLOG(1) << "Sec-WebSocket-Protocol: " << req->get("sec-websocket-protocol");
-            VLOG(1) << "sec-web-socket-extensions: " << req->get("sec-websocket-extensions");
-            VLOG(1) << "sec-websocket-key: " << req->get("sec-websocket-key");
-            VLOG(1) << "sec-websocket-version: " << req->get("sec-websocket-version");
-            VLOG(1) << "upgrade: " << req->get("upgrade");
-            VLOG(1) << "user-agent: " << req->get("user-agent");
+            snode::semantic::appLog().debug() << "Connection: " << req->get("connection");
+            snode::semantic::appLog().debug() << "Host: " << req->get("host");
+            snode::semantic::appLog().debug() << "Origin: " << req->get("origin");
+            snode::semantic::appLog().debug() << "Sec-WebSocket-Protocol: " << req->get("sec-websocket-protocol");
+            snode::semantic::appLog().debug() << "sec-web-socket-extensions: " << req->get("sec-websocket-extensions");
+            snode::semantic::appLog().debug() << "sec-websocket-key: " << req->get("sec-websocket-key");
+            snode::semantic::appLog().debug() << "sec-websocket-version: " << req->get("sec-websocket-version");
+            snode::semantic::appLog().debug() << "upgrade: " << req->get("upgrade");
+            snode::semantic::appLog().debug() << "user-agent: " << req->get("user-agent");
 
             if (web::http::ciContains(req->get("connection"), "Upgrade")) {
                 res->upgrade(req, [&subProtocolsRequested = req->get("upgrade"), res](const std::string& name) -> void {
                     if (!name.empty()) {
-                        VLOG(1) << "Successful upgrade to '" << name << "'  requested: " << subProtocolsRequested;
+                        snode::semantic::appLog().debug() << "Successful upgrade to '" << name << "'  requested: " << subProtocolsRequested;
                     } else {
-                        VLOG(1) << "Can not upgrade to any of '" << subProtocolsRequested << "'";
+                        snode::semantic::appLog().warn() << "Can not upgrade to any of '" << subProtocolsRequested << "'";
                     }
                     res->end();
                 });
@@ -144,16 +144,16 @@ int main(int argc, char* argv[]) {
                          const core::socket::State& state) -> void { // Listen on all bluetooth interfaces on channel 16{
             switch (state) {
                 case core::socket::State::OK:
-                    VLOG(1) << "tls: listening on '" << socketAddress.toString() << "'";
+                    snode::semantic::appLog().info() << "tls: listening on '" << socketAddress.toString() << "'";
                     break;
                 case core::socket::State::DISABLED:
-                    VLOG(1) << "tls: disabled";
+                    snode::semantic::appLog().info() << "tls: disabled";
                     break;
                 case core::socket::State::ERROR:
-                    VLOG(1) << "tls: non critical error occurred";
+                    snode::semantic::appLog().warn() << "tls: non critical error occurred";
                     break;
                 case core::socket::State::FATAL:
-                    VLOG(1) << "tls: critical error occurred";
+                    snode::semantic::appLog().critical() << "tls: critical error occurred";
                     break;
             }
         });
