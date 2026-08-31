@@ -25,7 +25,7 @@ namespace web::websocket {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include <cstring>
-#include <log/Logger.h>
+#include <SemanticLog.h>
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -39,22 +39,28 @@ namespace web::websocket::subprotocol::echo::client {
     }
 
     void Echo::onConnected() {
-        VLOG(0) << "Echo connected:";
+        snode::semantic::appLog().info() << "Echo connected:";
     }
 
     void Echo::onMessageStart(int opCode) {
-        VLOG(0) << "Message Start - OpCode: " << opCode;
+        snode::semantic::appLog().debug() << "Message Start - OpCode: " << opCode;
     }
 
     void Echo::onMessageData(const char* junk, std::size_t junkLen) {
         data += std::string(junk, junkLen);
 
-        VLOG(0) << "Message Fragment: " << std::string(junk, junkLen);
+        auto log = snode::semantic::appLog();
+        if (log.enabled(logger::LogLevel::Trace)) {
+            log.trace() << "Message Fragment: " << std::string(junk, junkLen);
+        }
     }
 
     void Echo::onMessageEnd() {
-        VLOG(0) << "Message Full Data: " << data;
-        VLOG(0) << "Message End";
+        auto log = snode::semantic::appLog();
+        if (log.enabled(logger::LogLevel::Trace)) {
+            log.trace() << "Message Full Data: " << data;
+        }
+        snode::semantic::appLog().debug() << "Message End";
         /*
                 forEachClient([&data = this->data](SubProtocol* client) {
                     client->sendMessage(data);
@@ -66,20 +72,20 @@ namespace web::websocket::subprotocol::echo::client {
     }
 
     void Echo::onMessageError(uint16_t errnum) {
-        VLOG(0) << "Message error: " << errnum;
+        snode::semantic::appLog().warn() << "Message error: " << errnum;
     }
 
     void Echo::onPongReceived() {
-        VLOG(0) << "Pong received";
+        snode::semantic::appLog().debug() << "Pong received";
         flyingPings = 0;
     }
 
     void Echo::onDisconnected() {
-        VLOG(0) << "Echo disconnected:";
+        snode::semantic::appLog().info() << "Echo disconnected:";
     }
 
     bool Echo::onSignal(int sig) {
-        LOG(INFO) << "SubProtocol 'echo' exit dot to '" << strsignal(sig) << "' (SIG" << sigabbrev_np(sig) << " = " << sig << ")";
+        snode::semantic::appLog().info() << "SubProtocol 'echo' exit dot to '" << strsignal(sig) << "' (SIG" << sigabbrev_np(sig) << " = " << sig << ")";
 
         return true;
     }

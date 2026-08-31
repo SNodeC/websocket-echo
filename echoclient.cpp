@@ -19,7 +19,7 @@
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include "core/SNodeC.h"               // for SNodeC
-#include "log/Logger.h"                // for Writer, Storage
+#include <SemanticLog.h>
 #include "web/http/legacy/in/Client.h" // for Client, Client<>...
 #include "web/http/tls/in/Client.h"    // for Client, Client<>...
 
@@ -50,44 +50,44 @@ int main(int argc, char* argv[]) {
         EchoClientLegacy legacyClient(
             "legacy",
             [](const SocketConnectionLegacy* socketConnection) -> void {
-                VLOG(0) << "OnConnect";
+                snode::semantic::appLog().debug() << "OnConnect";
 
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+                snode::semantic::appLog().debug() << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                snode::semantic::appLog().debug() << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
             [](const SocketConnectionLegacy* socketConnection) -> void {
-                VLOG(0) << "OnConnected";
+                snode::semantic::appLog().debug() << "OnConnected";
 
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+                snode::semantic::appLog().debug() << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                snode::semantic::appLog().debug() << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
             [](const SocketConnectionLegacy* socketConnection) -> void {
-                VLOG(0) << "OnDisconnect";
+                snode::semantic::appLog().debug() << "OnDisconnect";
 
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+                snode::semantic::appLog().debug() << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                snode::semantic::appLog().debug() << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
             [](const std::shared_ptr<Request>& request) -> void {
-                VLOG(0) << "OnRequestBegin";
+                snode::semantic::appLog().debug() << "OnRequestBegin";
 
                 request->set("Sec-WebSocket-Protocol", "test, echo");
 
                 request->upgrade(
                     "/ws/", "websocket", [](const std::shared_ptr<Request>& req, const std::shared_ptr<Response>& res) -> void {
-                        VLOG(1) << "OnResponse";
-                        VLOG(2) << "     Status:";
-                        VLOG(2) << "       " << res->httpVersion << " " << res->statusCode << " " << res->reason;
+                        snode::semantic::appLog().debug() << "OnResponse";
+                        snode::semantic::appLog().debug() << "     Status:";
+                        snode::semantic::appLog().debug() << "       " << res->httpVersion << " " << res->statusCode << " " << res->reason;
 
-                        VLOG(2) << "     Headers:";
+                        snode::semantic::appLog().debug() << "     Headers:";
                         for (const auto& [field, value] : res->headers) {
-                            VLOG(2) << "       " << field + " = " + value;
+                            snode::semantic::appLog().debug() << "       " << field + " = " + value;
                         }
 
-                        VLOG(2) << "     Cookies:";
+                        snode::semantic::appLog().debug() << "     Cookies:";
                         for (const auto& [name, cookie] : res->cookies) {
-                            VLOG(2) << "       " + name + " = " + cookie.getValue();
+                            snode::semantic::appLog().debug() << "       " + name + " = " + cookie.getValue();
                             for (const auto& [option, value] : cookie.getOptions()) {
-                                VLOG(2) << "         " + option + " = " + value;
+                                snode::semantic::appLog().debug() << "         " + option + " = " + value;
                             }
                         }
 
@@ -95,33 +95,33 @@ int main(int argc, char* argv[]) {
                                      [subProtocolsRequested = req->header("Upgrade"),
                                       &subProtocol = res->headers["upgrade"]](const std::string& name) -> void {
                                          if (!name.empty()) {
-                                             VLOG(1)
+                                             snode::semantic::appLog().debug()
                                                  << "Successful upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
                                          } else {
-                                             VLOG(1) << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                             snode::semantic::appLog().warn() << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
                                          }
                                      });
                     });
             },
             [](const std::shared_ptr<Request>& request) -> void {
-                VLOG(0) << "OnRequestEnd";
+                snode::semantic::appLog().debug() << "OnRequestEnd";
             });
 
         legacyClient.connect("localhost", 8080, [](const SocketAddressLegacy& socketAddress, const core::socket::State& state) -> void {
             switch (state) {
                 case core::socket::State::OK:
-                    VLOG(1) << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
+                    snode::semantic::appLog().info() << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
                     break;
                 case core::socket::State::DISABLED:
-                    VLOG(1) << "legacy: disabled";
+                    snode::semantic::appLog().info() << "legacy: disabled";
                     break;
                 case core::socket::State::ERROR:
-                    VLOG(1) << "legacy: " << socketAddress.toString() << ": non critical error occurred";
-                    VLOG(1) << "    " << state.what();
+                    snode::semantic::appLog().warn() << "legacy: " << socketAddress.toString() << ": non critical error occurred";
+                    snode::semantic::appLog().warn() << "    " << state.what();
                     break;
                 case core::socket::State::FATAL:
-                    VLOG(1) << "legacy: " << socketAddress.toString() << ": critical error occurred";
-                    VLOG(1) << "    " << state.what();
+                    snode::semantic::appLog().critical() << "legacy: " << socketAddress.toString() << ": critical error occurred";
+                    snode::semantic::appLog().critical() << "    " << state.what();
                     break;
             }
         }); // Connection:keep-alive\r\n\r\n"
@@ -135,25 +135,25 @@ int main(int argc, char* argv[]) {
         EchoClientTls tlsClient(
             "tls",
             [](const SocketConnectionTLS* socketConnection) -> void {
-                VLOG(0) << "OnConnect";
+                snode::semantic::appLog().debug() << "OnConnect";
 
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+                snode::semantic::appLog().debug() << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                snode::semantic::appLog().debug() << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
             [](const SocketConnectionTLS* socketConnection) -> void {
-                VLOG(0) << "OnConnected";
+                snode::semantic::appLog().debug() << "OnConnected";
                 X509* server_cert = SSL_get_peer_certificate(socketConnection->getSSL());
                 if (server_cert != nullptr) {
                     long verifyErr = SSL_get_verify_result(socketConnection->getSSL());
 
-                    VLOG(0) << "     Server certificate: " + std::string(X509_verify_cert_error_string(verifyErr));
+                    snode::semantic::appLog().debug() << "     Server certificate: " + std::string(X509_verify_cert_error_string(verifyErr));
 
                     char* str = X509_NAME_oneline(X509_get_subject_name(server_cert), nullptr, 0);
-                    VLOG(0) << "        Subject: " + std::string(str);
+                    snode::semantic::appLog().debug() << "        Subject: " + std::string(str);
                     OPENSSL_free(str);
 
                     str = X509_NAME_oneline(X509_get_issuer_name(server_cert), nullptr, 0);
-                    VLOG(0) << "        Issuer: " + std::string(str);
+                    snode::semantic::appLog().debug() << "        Issuer: " + std::string(str);
                     OPENSSL_free(str);
 
                     // We could do all sorts of certificate verification stuff here
@@ -163,57 +163,57 @@ int main(int argc, char* argv[]) {
                         static_cast<GENERAL_NAMES*>(X509_get_ext_d2i(server_cert, NID_subject_alt_name, nullptr, nullptr));
 
                     int32_t altNameCount = sk_GENERAL_NAME_num(subjectAltNames);
-                    VLOG(0) << "        Subject alternative name count: " << altNameCount;
+                    snode::semantic::appLog().debug() << "        Subject alternative name count: " << altNameCount;
                     for (int32_t i = 0; i < altNameCount; ++i) {
                         GENERAL_NAME* generalName = sk_GENERAL_NAME_value(subjectAltNames, i);
                         if (generalName->type == GEN_URI) {
                             std::string subjectAltName =
                                 std::string(reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.uniformResourceIdentifier)),
                                             static_cast<std::size_t>(ASN1_STRING_length(generalName->d.uniformResourceIdentifier)));
-                            VLOG(0) << "           SAN (URI): '" + subjectAltName;
+                            snode::semantic::appLog().debug() << "           SAN (URI): '" + subjectAltName;
                         } else if (generalName->type == GEN_DNS) {
                             std::string subjectAltName =
                                 std::string(reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.dNSName)),
                                             static_cast<std::size_t>(ASN1_STRING_length(generalName->d.dNSName)));
-                            VLOG(0) << "           SAN (DNS): '" + subjectAltName;
+                            snode::semantic::appLog().debug() << "           SAN (DNS): '" + subjectAltName;
                         } else {
-                            VLOG(0) << "           SAN (Type): '" + std::to_string(generalName->type);
+                            snode::semantic::appLog().debug() << "           SAN (Type): '" + std::to_string(generalName->type);
                         }
                     }
                     sk_GENERAL_NAME_pop_free(subjectAltNames, GENERAL_NAME_free);
 
                     X509_free(server_cert);
                 } else {
-                    VLOG(0) << "     Server certificate: no certificate";
+                    snode::semantic::appLog().debug() << "     Server certificate: no certificate";
                 }
             },
             [](const SocketConnectionTLS* socketConnection) -> void {
-                VLOG(0) << "OnDisconnect";
+                snode::semantic::appLog().debug() << "OnDisconnect";
 
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+                snode::semantic::appLog().debug() << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                snode::semantic::appLog().debug() << "\tClient: " + socketConnection->getLocalAddress().toString();
             },
             [](const std::shared_ptr<Request>& request) -> void {
-                VLOG(0) << "OnRequestBegin";
+                snode::semantic::appLog().debug() << "OnRequestBegin";
 
                 request->set("Sec-WebSocket-Protocol", "test, echo");
 
                 request->upgrade(
                     "/ws/", "websocket", [](const std::shared_ptr<Request>& req, const std::shared_ptr<Response>& res) -> void {
-                        VLOG(1) << "OnResponse";
-                        VLOG(2) << "     Status:";
-                        VLOG(2) << "       " << res->httpVersion << " " << res->statusCode << " " << res->reason;
+                        snode::semantic::appLog().debug() << "OnResponse";
+                        snode::semantic::appLog().debug() << "     Status:";
+                        snode::semantic::appLog().debug() << "       " << res->httpVersion << " " << res->statusCode << " " << res->reason;
 
-                        VLOG(2) << "     Headers:";
+                        snode::semantic::appLog().debug() << "     Headers:";
                         for (const auto& [field, value] : res->headers) {
-                            VLOG(2) << "       " << field + " = " + value;
+                            snode::semantic::appLog().debug() << "       " << field + " = " + value;
                         }
 
-                        VLOG(2) << "     Cookies:";
+                        snode::semantic::appLog().debug() << "     Cookies:";
                         for (const auto& [name, cookie] : res->cookies) {
-                            VLOG(2) << "       " + name + " = " + cookie.getValue();
+                            snode::semantic::appLog().debug() << "       " + name + " = " + cookie.getValue();
                             for (const auto& [option, value] : cookie.getOptions()) {
-                                VLOG(2) << "         " + option + " = " + value;
+                                snode::semantic::appLog().debug() << "         " + option + " = " + value;
                             }
                         }
 
@@ -221,33 +221,33 @@ int main(int argc, char* argv[]) {
                                      [subProtocolsRequested = req->header("Upgrade"),
                                       &subProtocol = res->headers["upgrade"]](const std::string& name) -> void {
                                          if (!name.empty()) {
-                                             VLOG(1)
+                                             snode::semantic::appLog().debug()
                                                  << "Successful upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
                                          } else {
-                                             VLOG(1) << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
+                                             snode::semantic::appLog().warn() << "Can not upgrade to '" << subProtocol << "' requested: " << subProtocolsRequested;
                                          }
                                      });
                     });
             },
             [](const std::shared_ptr<Request>& request) -> void {
-                VLOG(0) << "OnRequestEnd";
+                snode::semantic::appLog().debug() << "OnRequestEnd";
             });
 
         tlsClient.connect("localhost", 8088, [](const SocketAddressTLS& socketAddress, const core::socket::State& state) -> void {
             switch (state) {
                 case core::socket::State::OK:
-                    VLOG(1) << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
+                    snode::semantic::appLog().info() << "legacy: connected to '" << socketAddress.toString() << "': " << state.what();
                     break;
                 case core::socket::State::DISABLED:
-                    VLOG(1) << "legacy: disabled";
+                    snode::semantic::appLog().info() << "legacy: disabled";
                     break;
                 case core::socket::State::ERROR:
-                    VLOG(1) << "legacy: " << socketAddress.toString() << ": non critical error occurred";
-                    VLOG(1) << "    " << state.what();
+                    snode::semantic::appLog().warn() << "legacy: " << socketAddress.toString() << ": non critical error occurred";
+                    snode::semantic::appLog().warn() << "    " << state.what();
                     break;
                 case core::socket::State::FATAL:
-                    VLOG(1) << "legacy: " << socketAddress.toString() << ": critical error occurred";
-                    VLOG(1) << "    " << state.what();
+                    snode::semantic::appLog().critical() << "legacy: " << socketAddress.toString() << ": critical error occurred";
+                    snode::semantic::appLog().critical() << "    " << state.what();
                     break;
             }
         }); // Connection:keep-alive\r\n\r\n"
